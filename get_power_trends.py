@@ -11,8 +11,9 @@ from datetime import datetime, date, time
 from pyspark import SparkContext
 sc = SparkContext()
 
-LOCAL_PATH = './data/anoms*.gz'
-TEST_PATH = './data/anomstest.csv'
+FULL_PATH = 'hdfs:///user/iw453/demand/anoms*.gz'
+TEST_PATH = 'hdfs:///user/iw453/demand/anomstest.csv'
+DICT_PATH = 'hdfs:///user/iw453/demand/anoms_dict.pickle'
 
 
 def get_point(lng, lat):
@@ -79,8 +80,8 @@ def get_top_values(col_index, n):
 
 if __name__ == "__main__":
 
-	# where will it sit
-	with open('./data/anoms_dict.pickle', 'rb') as handle:
+	# where will it sit?
+	with open(DICT_PATH, 'rb') as handle:
 	    anoms_dict = pickle.load(handle)
 
 	# create single RDD from multiple zipped data files; correct string encoding, astrip first line
