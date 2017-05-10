@@ -11,9 +11,9 @@ from datetime import datetime, date, time
 from pyspark import SparkContext
 sc = SparkContext()
 
-FULL_PATH = 'hdfs:///user/iw453/demand/anoms*.gz'
-TEST_PATH = 'hdfs:///user/iw453/demand/anomstest.csv'
-DICT_PATH = 'hdfs:///user/iw453/demand/anoms_dict.pickle'
+FULL_PATH = '/user/iw453/demand/anoms*.gz'
+TEST_PATH = '/user/iw453/demand/anomstest.csv'
+DICT_PATH = './data/anoms_dict.pickle'
 
 
 def get_point(lng, lat):
