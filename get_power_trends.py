@@ -11,9 +11,12 @@ from datetime import datetime, date, time
 from pyspark import SparkContext
 sc = SparkContext()
 
-FULL_PATH = 'hdfs:/user/iw453/demand/anoms*.gz'
-TEST_PATH = 'hdfs:/user/iw453/demand/anomstest.csv'
-DICT_PATH = 'hdfs:/user/iw453/demand/anoms_dict.pickle'
+# set mode as 'TEST' or 'FULL'
+MODE = 'TEST'
+
+FULL_PATH = '/user/iw453/demand/anoms*.gz'
+TEST_PATH = '/user/iw453/demand/anomstest.csv'
+DICT_PATH = './data/anoms_dict.pickle'
 
 
 def get_point(lng, lat):
@@ -85,28 +88,65 @@ if __name__ == "__main__":
 	    anoms_dict = pickle.load(handle)
 
 	# create single RDD from multiple zipped data files; correct string encoding, astrip first line
-	anoms = sc.textFile(TEST_PATH)
+    if MODE == 'TEST':
+        CHOSEN_PATH = TEST_PATH
+    else:
+        CHOSEN_PATH = FULL_PATH
+
+	anoms = sc.textFile(CHOSEN_PATH)
 	anoms = anoms.map(lambda line: line.encode('utf-8'))
 	anoms = anoms.filter(lambda line: not line.startswith('SQL'))
 
 	# map by partition for initial data volume reduction (heaviest lifting is here)
 	reduced_anoms = anoms.mapPartitions(parse_events)
 
+
 	# top 10 actor names, by region
-	print 'top 10 actor names, by region:\n', get_top_values(1, 10)
+    actor_names = get_top_values(1, 10)
+	print 'top 10 actor names, by region:\n', actor_names
+
 	# top 10 actor types, by region
-	print 'top 10 actor types, by region:\n', get_top_values(2, 10)
+    actor_types = get_top_values(2, 10)
+	print 'top 10 actor types, by region:\n', actor_types
+
 	# top 10 event codes, by region
-	print 'top 10 event codes, by region:\n', get_top_values(3, 10)
+    event_codes = get_top_values(3, 10)
+	print 'top 10 event codes, by region:\n', event_codes
+
 	# see counts of the four quad classes, by region
-	print 'counts of the four quad classes, by region:\n', get_top_values(4, 4)
+    quad_classes = get_top_values(4, 4)
+	print 'counts of the four quad classes, by region:\n', quad_classes
 
 	# get average TONE, by region
-	print 'average tone, by region:\n'
-	print reduced_anoms.filter(lambda event: skip_missing(event, 5)) \
-	        .map(lambda event: (event[0], event[1][5])) \
-	        .mapValues(lambda v: (v, 1)) \
-	        .reduceByKey(lambda a, b: (a[0]+b[0], a[1]+b[1])) \
-	        .mapValues(lambda v:v[0] / v[1]) \
-	        .collect()
+    avg_tone = reduced_anoms.filter(lambda event: skip_missing(event, 5)) \
+            .map(lambda event: (event[0], event[1][5])) \
+            .mapValues(lambda v: (v, 1)) \
+            .reduceByKey(lambda a, b: (a[0]+b[0], a[1]+b[1])) \
+            .mapValues(lambda v:v[0] / v[1]) \
+            .collect()
+	print 'average tone, by region:\n', avg_tone
+
+
+    # write results to a text file for later reference
+    with open('anom_results.txt', 'wb') as f:
+
+        f.write('top 10 actor names, by region')
+        for item in actor_names:
+            f.write(item)
+
+        f.write('top 10 actor types, by region')
+        for item in actor_types:
+            f.write(tem)
+	
+        f.write('top 10 event codes, by region')
+        for item in event_codes:
+            f.write(item)
+
+        f.write('counts of quad classes, by region')
+        for item in quad_classes:
+            f.write(item)
+
+        f.write('average tone, by region')
+        for item in avg_tone:
+            f.write(item)
 
