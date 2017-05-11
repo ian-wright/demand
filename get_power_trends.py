@@ -1,3 +1,6 @@
+# AUTHOR: Ian Wright
+# LAST EDITED: May 10, 2017
+
 import geopandas as gpd
 import shapely
 from shapely.geometry import Point
@@ -24,6 +27,13 @@ def get_point(lng, lat):
 
 
 def parse_events(events):
+    """
+    checks is a GDELT event is associated with a regional demand anomaly
+    - first finds the EIA region for which the GDELT event date corresponded to a demand anom.
+    - once the region is found, a spatial operation is performed to check if the GDELT
+        event occurred within the given region's polygon
+    - anomaly-associated events are passed through (filter functionality)
+    """
     reader = csv.reader(events)
     # for each event record
     for event in reader:
@@ -46,18 +56,19 @@ def parse_events(events):
                 pass
 
 
+# filter: skip records with missing values
 def skip_missing(line, col_index):
     return line[1][col_index] != ''
 
-
+# map: combines original key with a field from V into a new concatenated key, in preparation for count
 def concat_for_count(line, col_index):
     return (line[0] + '_' + str(line[1][col_index]), 1)
 
-
+# map: re-divides the concatentated key
 def resplit_regions(line):
     return (line[0].split('_')[0], (line[0].split('_')[1], line[1]))
 
-
+# finds the most common 'n' values from a particular feature 
 def get_top_n(v, n):
     return sorted(list(v), key=lambda x: x[1], reverse=True)[:n]
 
@@ -87,7 +98,7 @@ if __name__ == "__main__":
 	with open(DICT_PATH, 'rb') as handle:
 	    anoms_dict = pickle.load(handle)
 
-	# create single RDD from multiple zipped data files; correct string encoding, astrip first line
+	# create single RDD from multiple zipped data files; correct string encoding, strip header row
     if MODE == 'TEST':
         CHOSEN_PATH = TEST_PATH
     else:
@@ -132,26 +143,26 @@ if __name__ == "__main__":
 
         f.write('top 10 actor names, by region:\n')
         for item in actor_names:
-            f.write(str(item))
+            f.write(str(item) + '\n')
         f.write('\n\n')
 
         f.write('top 10 actor types, by region:\n')
         for item in actor_types:
-            f.write(str(item))
+            f.write(str(item) + '\n')
         f.write('\n\n')
 	
         f.write('top 10 event codes, by region:\n')
         for item in event_codes:
-            f.write(str(item))
+            f.write(str(item) + '\n')
         f.write('\n\n')
 
         f.write('counts of quad classes, by region:\n')
         for item in quad_classes:
-            f.write(str(item))
+            f.write(str(item) + '\n')
         f.write('\n\n')
 
-        f.write('average tone, by region')
+        f.write('average tone, by region:\n')
         for item in avg_tone:
-            f.write(str(item))
+            f.write(str(item) + '\n')
         f.write('\n\n')
 
