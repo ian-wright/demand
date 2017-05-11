@@ -130,23 +130,28 @@ if __name__ == "__main__":
     # write results to a text file for later reference
     with open('anom_results.txt', 'wb') as f:
 
-        f.write('top 10 actor names, by region')
+        f.write('top 10 actor names, by region:\n')
         for item in actor_names:
-            f.write(item)
+            f.write(str(item))
+        f.write('\n\n')
 
-        f.write('top 10 actor types, by region')
+        f.write('top 10 actor types, by region:\n')
         for item in actor_types:
-            f.write(tem)
+            f.write(str(item))
+        f.write('\n\n')
 	
-        f.write('top 10 event codes, by region')
+        f.write('top 10 event codes, by region:\n')
         for item in event_codes:
-            f.write(item)
+            f.write(str(item))
+        f.write('\n\n')
 
-        f.write('counts of quad classes, by region')
+        f.write('counts of quad classes, by region:\n')
         for item in quad_classes:
-            f.write(item)
+            f.write(str(item))
+        f.write('\n\n')
 
         f.write('average tone, by region')
         for item in avg_tone:
-            f.write(item)
+            f.write(str(item))
+        f.write('\n\n')
 
